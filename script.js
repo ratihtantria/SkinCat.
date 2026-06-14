@@ -1,4 +1,3 @@
-// Data Gejala Utama
 const gejalaMaster = [
     { id: 0, label: "Gatal intens pada kulit" },
     { id: 1, label: "Kemerahan pada kulit" },
@@ -18,152 +17,184 @@ const gejalaMaster = [
     { id: 15, label: "Lesi / kemerahan di sekitar bibir atau dagu (non komedo)" }
 ];
 
-// Data Penyakit & Aturan Sistem Pakar (Melanjutkan kode kamu yang terpotong)
 const diseasesData = [
     { 
-        name: "Flea Allergic Dermatitis (FAD)", 
+        name: "Flea Allergic Dermatitis", 
         shortDesc: "Alergi kutu → gatal, kemerahan, rontok pangkal ekor, ditemukan kutu.",
         gejalaIndices: [0, 1, 2, 3, 11, 12],
-        saran: "Lakukan kontrol kutu (spot-on/frontline). Konsultasi ke dokter untuk antiinflamasi. Bersihkan lingkungan secara berkala."
+        saran: "➤ Lakukan kontrol kutu (spot-on/frontline). Konsultasi ke dokter untuk antiinflamasi. Bersihkan lingkungan."
     },
     { 
         name: "Ringworm (Kurap)", 
         shortDesc: "Infeksi jamur → lesi melingkar, rambut rontok cincin, bersisik.",
         gejalaIndices: [4, 5, 11],
-        saran: "Isolasi kucing agar tidak menular. Gunakan antijamur topikal (salep/miconazole) & obat oral sesuai resep dokter hewan. Sterilkan kandang & ruangan."
+        saran: "➤ Isolasi kucing, gunakan antijamur topikal (miconazole) & oral sesuai resep dokter. Sterilkan lingkungan."
     },
     { 
         name: "Scabies (Kudis)", 
-        shortDesc: "Infestasi tungau → gatal ekstrem, keropeng tebal telinga/wajah, penebalan kulit.",
+        shortDesc: "Tungau → gatal ekstrem, keropeng tebal telinga/wajah, penebalan kulit.",
         gejalaIndices: [0, 6, 7, 13, 14, 12],
-        saran: "Segera konsultasi ke dokter untuk suntik antiparasit (ivermectin) atau obat tetes (selamektin). Mandikan dengan sampo sulfur/khusus medis."
+        saran: "➤ Segera konsultasi dokter untuk obat antiparasit (ivermectin/selamektin). Mandi obat, semua hewan kontak diobati."
     },
     { 
         name: "Feline Acne", 
-        shortDesc: "Komedom hitam / jerawat di dagu kucing.",
-        gejalaIndices: [8, 9, 10, 15],
-        saran: "Ganti mangkuk makan plastik dengan stainless-steel atau keramik. Bersihkan dagu dengan antiseptik chlorhexidine secara rutin."
+        shortDesc: "Komedo dagu, bengkak, pustula, kemerahan.",
+        gejalaIndices: [8, 9, 10, 15, 1],
+        saran: "➤ Bersihkan dagu dengan sabun antiseptik (chlorhexidine). Ganti mangkuk plastik dengan stainless steel/keramik. Hindari stres."
     }
 ];
 
-// Fungsi Navigasi Antar Halaman
-function showPage(pageId) {
-    // Sembunyikan semua halaman
-    const pages = document.querySelectorAll('.page');
-    pages.forEach(page => page.classList.remove('active-page'));
-    
-    // Matikan status active di tombol navigasi header
-    const navButtons = document.querySelectorAll('.nav-btn');
-    navButtons.forEach(btn => btn.classList.remove('active'));
-    
-    // Tampilkan halaman terpilih
-    const targetPage = document.getElementById(`${pageId}-page`);
-    if (targetPage) {
-        targetPage.classList.add('active-page');
-    }
-    
-    // Aktifkan tombol navigasi yang sesuai
-    const activeBtn = document.querySelector(`.nav-btn[data-nav="${pageId}"]`);
-    if (activeBtn) {
-        activeBtn.classList.add('active');
-    }
-
-    // Scroll otomatis ke atas halaman saat pindah menu
-    window.scrollTo({ top: 0, behavior: 'smooth' });
+const gejalaContainer = document.getElementById('gejala-container');
+function renderCheckboxes() {
+    if (!gejalaContainer) return;
+    gejalaContainer.innerHTML = '';
+    gejalaMaster.forEach(gejala => {
+        const div = document.createElement('div');
+        div.className = 'gejala-item';
+        const cb = document.createElement('input');
+        cb.type = 'checkbox';
+        cb.id = `gejala_${gejala.id}`;
+        cb.setAttribute('value', gejala.id);
+        const label = document.createElement('label');
+        label.htmlFor = `gejala_${gejala.id}`;
+        label.innerText = ServerLabel(gejala.label);
+        div.appendChild(cb);
+        div.appendChild(label);
+        gejalaContainer.appendChild(div);
+    });
 }
 
-// Menjalankan Kode Setelah Seluruh HTML Selesai Dimuat
-document.addEventListener("DOMContentLoaded", function() {
-    
-    // 1. Logika Event Listener Tombol Navigasi Header
-    const navButtons = document.querySelectorAll('.nav-btn');
-    navButtons.forEach(button => {
-        button.addEventListener('click', function() {
-            const pageId = this.getAttribute('data-nav');
-            showPage(pageId);
-        });
+// Fungsi bantu jika ada properti icon yang belum terdefinisi di objek agar tidak memicu error undefined
+function ServerLabel(text){
+    return text;
+}
+
+function getSelectedGejala() {
+    const checkboxes = document.querySelectorAll('#gejala-container input[type="checkbox"]');
+    const selected = [];
+    checkboxes.forEach(cb => {
+        if (cb.checked) selected.push(parseInt(cb.value));
     });
+    return selected;
+}
 
-    // 2. Tombol "Mulai Deteksi Gejala" di Beranda Utama
-    const homeDeteksiBtn = document.getElementById('home-deteksi-btn');
-    if (homeDeteksiBtn) {
-        homeDeteksiBtn.addEventListener('click', function() {
-            showPage('deteksi');
-        });
+function resetGejala() {
+    const checkboxes = document.querySelectorAll('#gejala-container input[type="checkbox"]');
+    checkboxes.forEach(cb => cb.checked = false);
+    const hasilDiv = document.getElementById('hasil-deteksi');
+    if (hasilDiv) hasilDiv.style.display = 'none';
+}
+
+function detectDisease(selectedIndices) {
+    if (!selectedIndices.length) {
+        return { error: true, message: "⚠️ Belum ada gejala yang dipilih. Silakan centang minimal satu ciri-ciri pada kucing Anda." };
     }
+    const results = diseasesData.map(disease => {
+        let matchCount = 0;
+        for (let idx of selectedIndices) {
+            if (disease.gejalaIndices.includes(idx)) matchCount++;
+        }
+        let percent = (matchCount / selectedIndices.length) * 100;
+        percent = Math.min(100, Math.round(percent));
+        return { ...disease, matchCount, percent };
+    });
+    results.sort((a,b) => b.percent - a.percent);
+    const top = results[0];
+    const secondary = results[1] && results[1].percent > 20 && (top.percent - results[1].percent) < 35 ? results[1] : null;
+    return { top, secondary, totalGejala: selectedIndices.length };
+}
 
-    // 3. Merender (Memunculkan) Daftar Gejala secara Otomatis ke dalam Grid HTML
-    const containerGejala = document.getElementById('gejala-container');
-    if (containerGejala) {
-        gejalaMaster.forEach(gejala => {
-            const item = document.createElement('div');
-            item.className = 'gejala-item';
-            item.innerHTML = `
-                <input type="checkbox" id="gejala-${gejala.id}" value="${gejala.id}">
-                <label for="gejala-${gejala.id}">${gejala.label}</label>
-            `;
-            containerGejala.appendChild(item);
-        });
+function displayResult(selectedIndices) {
+    const resultDiv = document.getElementById('hasil-deteksi');
+    if (!resultDiv) return;
+    const detection = detectDisease(selectedIndices);
+    if (detection.error) {
+        resultDiv.style.display = 'block';
+        resultDiv.innerHTML = `<div style="color:#7c3aed;">${detection.message}</div>`;
+        return;
     }
+    const topDisease = detection.top;
+    
+    // Validasi icon jika data aslinya tidak menyertakan properti icon
+    const topIcon = topDisease.icon ? topDisease.icon : "🐾";
+    const secIcon = (detection.secondary && detection.secondary.icon) ? detection.secondary.icon : "🐾";
 
-    // 4. Proses Tombol "Deteksi Sekarang" (Logika Sistem Pakar Sederhana)
+    let html = `
+        <div style="font-weight:800; font-size:1.4rem; margin-bottom:12px;">📊 Hasil Analisis Gejala</div>
+        <div style="background:#f9f6ff; border-radius:28px; padding:1rem;">
+            <strong>🎯 Kemungkinan utama:</strong> ${topIcon} ${topDisease.name} (${topDisease.percent}% kecocokan dari gejala yang dipilih)<br>
+            <strong>Deskripsi:</strong> ${topDisease.shortDesc}<br>
+            <strong>💡 Saran awal:</strong> ${topDisease.saran}
+        </div>
+    `;
+    if (detection.secondary) {
+        html += `<div style="margin-top: 12px; background:#f3efff; border-radius: 24px; padding:0.7rem;">🔍 Kemungkinan lain: ${secIcon} ${detection.secondary.name} (${detection.secondary.percent}% kecocokan)</div>`;
+    }
+    html += `<div style="margin-top: 16px; font-size:0.8rem; color:#6d28d9;">✅ Hasil berdasarkan ${detection.totalGejala} gejala yang dipilih. Konsultasikan ke dokter hewan untuk diagnosis lebih lanjut.</div>`;
+    resultDiv.style.display = 'block';
+    resultDiv.innerHTML = html;
+}
+
+const pages = {
+    'home': 'home-page',
+    'deteksi': 'deteksi-page',
+    'info': 'info-page',
+    'tips': 'tips-page',
+    'tentang': 'tentang-page'
+};
+
+function showPage(pageKey) {
+    const targetId = pages[pageKey];
+    if (!targetId) return;
+
+    Object.values(pages).forEach(pid => {
+        const el = document.getElementById(pid);
+        if (el) el.classList.remove('active-page');
+    });
+    
+    const target = document.getElementById(targetId);
+    if (target) target.classList.add('active-page');
+    
+    window.scrollTo({top: 0, behavior: 'smooth'});
+
+    document.querySelectorAll('.nav-btn').forEach(btn => {
+        if (btn.getAttribute('data-nav') === pageKey) {
+            btn.classList.add('active');
+        } else {
+            btn.classList.remove('active');
+        }
+    });
+}
+
+function init() {
+    renderCheckboxes();
+    
     const deteksiBtn = document.getElementById('deteksi-btn');
-    const hasilBox = document.getElementById('hasil-deteksi');
-
-    if (deteksiBtn && hasilBox) {
-        deteksiBtn.addEventListener('click', function() {
-            // Mengambil semua ID gejala yang dicentang user
-            const checkedBoxes = document.querySelectorAll('#gejala-container input[type="checkbox"]:checked');
-            const selectedGejalaIds = Array.from(checkedBoxes).map(cb => parseInt(cb.value));
-
-            if (selectedGejalaIds.length === 0) {
-                hasilBox.style.display = 'block';
-                hasilBox.innerHTML = `<h3 style="color:#dc2626;">Peringatan</h3><p>Silakan centang minimal satu gejala terlebih dahulu untuk mendeteksi penyakit!</p>`;
+    if (deteksiBtn) {
+        deteksiBtn.addEventListener('click', () => {
+            const selected = getSelectedGejala();
+            if (selected.length === 0) {
+                alert("Pilih minimal satu gejala / ciri-ciri pada kulit kucing.");
                 return;
             }
-
-            let hasilHTML = `<h2>Hasil Analisis Kemungkinan Penyakit:</h2>`;
-            let ditemukanPenyakit = false;
-
-            // Mencocokkan input user dengan data aturan penyakit
-            diseasesData.forEach(disease => {
-                // Menghitung berapa banyak gejala yang cocok
-                const cocok = disease.gejalaIndices.filter(id => selectedGejalaIds.includes(id));
-                const persentase = Math.round((cocok.length / disease.gejalaIndices.length) * 100);
-
-                // Jika kecocokan di atas 20%, tampilkan sebagai kemungkinan hasil
-                if (persentase > 20) {
-                    ditemukanPenyakit = true;
-                    hasilHTML += `
-                        <div style="margin-bottom: 1.5rem; padding-bottom: 1rem; border-bottom: 1px dashed #e2d6ff;">
-                            <h3 style="margin-top:0.5rem;">${disease.name} (Tingkat Akurasi Kemungkinan: ${persentase}%)</h3>
-                            <p style="margin: 0.3rem 0; color: #555;"><strong>Keterangan:</strong> ${disease.shortDesc}</p>
-                            <p style="color: #6d28d9;"><strong>Saran Awal:</strong> ${disease.saran}</p>
-                        </div>
-                    `;
-                }
-            });
-
-            if (!ditemukanPenyakit) {
-                hasilHTML += `<p>Gejala yang Anda masukkan terlalu minim atau tidak spesifik ke 4 penyakit utama kami. Silakan periksa kembali ciri fisik kucing Anda atau langsung bawa ke dokter hewan.</p>`;
-            }
-
-            hasilBox.style.display = 'block';
-            hasilBox.innerHTML = hasilHTML;
-            
-            // Scroll otomatis mengarah ke kotak hasil agar user langsung melihatnya
-            hasilBox.scrollIntoView({ behavior: 'smooth' });
+            displayResult(selected);
         });
     }
-
-    // 5. Tombol "Reset Pilihan" Gejala
+    
     const resetBtn = document.getElementById('reset-gejala-btn');
-    if (resetBtn && hasilBox) {
-        resetBtn.addEventListener('click', function() {
-            const checkboxes = document.querySelectorAll('#gejala-container input[type="checkbox"]');
-            checkboxes.forEach(cb => cb.checked = false);
-            hasilBox.style.display = 'none';
-            hasilBox.innerHTML = '';
+    if (resetBtn) resetBtn.addEventListener('click', resetGejala);
+    
+    const homeDeteksi = document.getElementById('home-deteksi-btn');
+    if (homeDeteksi) homeDeteksi.addEventListener('click', () => showPage('deteksi'));
+    
+    document.querySelectorAll('.nav-btn').forEach(btn => {
+        btn.addEventListener('click', () => {
+            const navKey = btn.getAttribute('data-nav');
+            if (navKey) showPage(navKey);
         });
-    }
-});
+    });
+    
+    showPage('home');
+}
+
+window.addEventListener('DOMContentLoaded', init);
