@@ -21,28 +21,28 @@ const gejalaMaster = [
 // Data Penyakit & Aturan Sistem Pakar (Melanjutkan kode kamu yang terpotong)
 const diseasesData = [
     { 
-        name: "Scabies (Kudis)", 
-        shortDesc: "Infestasi tungau → gatal ekstrem, keropeng tebal telinga/wajah, penebalan kulit.",
-        gejalaIndices: [0, 6, 7, 13, 14, 12],
-        saran: "Segera konsultasi ke dokter untuk suntik antiparasit (ivermectin) atau obat tetes (selamektin). Mandikan dengan sampo sulfur/khusus medis."
-    },
-    { 
         name: "Flea Allergic Dermatitis (FAD)", 
         shortDesc: "Alergi kutu → gatal, kemerahan, rontok pangkal ekor, ditemukan kutu.",
         gejalaIndices: [0, 1, 2, 3, 11, 12],
         saran: "Lakukan kontrol kutu (spot-on/frontline). Konsultasi ke dokter untuk antiinflamasi. Bersihkan lingkungan secara berkala."
     },
     { 
+        name: "Ringworm (Kurap)", 
+        shortDesc: "Infeksi jamur → lesi melingkar, rambut rontok cincin, bersisik.",
+        gejalaIndices: [4, 5, 11],
+        saran: "Isolasi kucing agar tidak menular. Gunakan antijamur topikal (salep/miconazole) & obat oral sesuai resep dokter hewan. Sterilkan kandang & ruangan."
+    },
+    { 
+        name: "Scabies (Kudis)", 
+        shortDesc: "Infestasi tungau → gatal ekstrem, keropeng tebal telinga/wajah, penebalan kulit.",
+        gejalaIndices: [0, 6, 7, 13, 14, 12],
+        saran: "Segera konsultasi ke dokter untuk suntik antiparasit (ivermectin) atau obat tetes (selamektin). Mandikan dengan sampo sulfur/khusus medis."
+    },
+    { 
         name: "Feline Acne", 
         shortDesc: "Komedom hitam / jerawat di dagu kucing.",
         gejalaIndices: [8, 9, 10, 15],
         saran: "Ganti mangkuk makan plastik dengan stainless-steel atau keramik. Bersihkan dagu dengan antiseptik chlorhexidine secara rutin."
-    },
-    { 
-        name: "Ringworm (Kurap)", 
-        shortDesc: "Infeksi jamur → lesi melingkar, rambut rontok cincin, bersisik.",
-        gejalaIndices: [4, 5, 11],
-        saran: "Isolasi kucing agar tidak menular. Gunakan antijamur topikal (salep/miconazole) & obat oral sesuai resep dokter hewan. Sterilkan kandang & ruangan." 
     }
 ];
 
