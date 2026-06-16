@@ -65,12 +65,10 @@ function renderCheckboxes() {
     });
 }
 
-// Fungsi bantu jika ada properti icon yang belum terdefinisi di objek agar tidak memicu error undefined
 function ServerLabel(text){
     return text;
 }
 
-// membaca gejala yg dipilih pengguna di halaman web dan mengubahnya menjadi bentuk data angka (array ID) yang siap dihitung
 function getSelectedGejala() {
     const checkboxes = document.querySelectorAll('#gejala-container input[type="checkbox"]');
     const selected = [];
@@ -91,7 +89,6 @@ function detectDisease(selectedIndices) {
     if (!selectedIndices.length) {
         return { error: true, message: "⚠️ Belum ada gejala yang dipilih. Silakan centang minimal satu ciri-ciri pada kucing Anda." };
     }
-    // Hitung Presentase Kecocokan
     const results = diseasesData.map(disease => {
         let matchCount = 0;
         for (let idx of selectedIndices) {
@@ -101,14 +98,12 @@ function detectDisease(selectedIndices) {
         percent = Math.min(100, Math.round(percent));
         return { ...disease, matchCount, percent };
     });
-    // INTERPRETASI DATA (SORTING & FILTERING)
     results.sort((a,b) => b.percent - a.percent);
     const top = results[0];
     const secondary = results[1] && results[1].percent > 20 && (top.percent - results[1].percent) < 35 ? results[1] : null;
     return { top, secondary, totalGejala: selectedIndices.length };
 }
 
-// OUTPUT dan penampilan hasil akhir
 function displayResult(selectedIndices) {
     const resultDiv = document.getElementById('hasil-deteksi');
     if (!resultDiv) return;
@@ -120,25 +115,52 @@ function displayResult(selectedIndices) {
     }
     const topDisease = detection.top;
     
-    // Validasi icon jika data aslinya tidak menyertakan properti icon
     const topIcon = topDisease.icon ? topDisease.icon : "🐾";
     const secIcon = (detection.secondary && detection.secondary.icon) ? detection.secondary.icon : "🐾";
 
-    //Membuat template HTML untuk menampilkan hasil top dan secondary
+    const infoTanggal = new Date().toLocaleDateString('id-ID', { 
+        weekday: 'long', year: 'numeric', month: 'long', day: 'numeric', hour: '2-digit', minute: '2-digit' 
+    });
+
     let html = `
-        <div style="font-weight:800; font-size:1.4rem; margin-bottom:12px;">📊 Hasil Analisis Gejala</div>
-        <div style="background:#f9f6ff; border-radius:28px; padding:1rem;">
+        <div style="font-weight:800; font-size:1.4rem; margin-bottom:4px;">📊 Hasil Analisis Gejala</div>
+        <p style="font-size:0.85rem; color:#666; margin-top:0; margin-bottom:15px;">Waktu Pemeriksaan: ${infoTanggal}</p>
+        
+        <div style="background:#f9f6ff; border-radius:28px; padding:1rem; margin-bottom:12px; border:1px solid #e9defa;">
             <strong>🎯 Kemungkinan utama:</strong> ${topIcon} ${topDisease.name} (${topDisease.percent}% kecocokan dari gejala yang dipilih)<br>
             <strong>Deskripsi:</strong> ${topDisease.shortDesc}<br>
             <strong>💡 Saran awal:</strong> ${topDisease.saran}
         </div>
     `;
+    
     if (detection.secondary) {
-        html += `<div style="margin-top: 12px; background:#f3efff; border-radius: 24px; padding:0.7rem;">🔍 Kemungkinan lain: ${secIcon} ${detection.secondary.name} (${detection.secondary.percent}% kecocokan)</div>`;
+        const secDisease = detection.secondary;
+        html += `
+            <div style="background:#f3efff; border-radius:24px; padding:1rem; margin-bottom:12px; border:1px solid #e3d5fa;">
+                <strong>🔍 Kemungkinan lain:</strong> ${secIcon} ${secDisease.name} (${secDisease.percent}% kecocokan)<br>
+                <strong>Deskripsi:</strong> ${secDisease.shortDesc}<br>
+                <strong>💡 Saran awal:</strong> ${secDisease.saran}
+            </div>
+        `;
     }
-    html += `<div style="margin-top: 16px; font-size:0.8rem; color:#6d28d9;">✅ Hasil berdasarkan ${detection.totalGejala} gejala yang dipilih. Konsultasikan ke dokter hewan untuk diagnosis lebih lanjut.</div>`;
+    
+    html += `<div style="margin-top: 16px; font-size:0.85rem; color:#6d28d9; margin-bottom:15px;">✅ Hasil berdasarkan ${detection.totalGejala} gejala yang dipilih. Konsultasikan ke dokter hewan untuk diagnosis lebih lanjut.</div>`;
+    // Untuk Fitur Cetak
+    html += `
+        <button id="cetak-hasil-btn" class="btn-print">
+            🖨️ Cetak Lembar Rekam Medis
+        </button>
+    `;
+
     resultDiv.style.display = 'block';
     resultDiv.innerHTML = html;
+
+    const cetakBtn = document.getElementById('cetak-hasil-btn');
+    if (cetakBtn) {
+        cetakBtn.addEventListener('click', () => {
+            window.print();
+        });
+    }
 }
 
 const pages = {
