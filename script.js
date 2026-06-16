@@ -1,3 +1,4 @@
+// Penyimpanan daftar semua gejala dan karakteristik setiap penyakit yang digunakan sebagai acuan perhitungan
 const gejalaMaster = [
     { id: 0, label: "Gatal intens pada kulit" },
     { id: 1, label: "Kemerahan pada kulit" },
@@ -69,6 +70,7 @@ function ServerLabel(text){
     return text;
 }
 
+// membaca gejala yg dipilih pengguna di halaman web dan mengubahnya menjadi bentuk data angka (array ID) yang siap dihitung
 function getSelectedGejala() {
     const checkboxes = document.querySelectorAll('#gejala-container input[type="checkbox"]');
     const selected = [];
@@ -89,6 +91,7 @@ function detectDisease(selectedIndices) {
     if (!selectedIndices.length) {
         return { error: true, message: "⚠️ Belum ada gejala yang dipilih. Silakan centang minimal satu ciri-ciri pada kucing Anda." };
     }
+    // Hitung Presentase Kecocokan
     const results = diseasesData.map(disease => {
         let matchCount = 0;
         for (let idx of selectedIndices) {
@@ -98,12 +101,14 @@ function detectDisease(selectedIndices) {
         percent = Math.min(100, Math.round(percent));
         return { ...disease, matchCount, percent };
     });
+    // INTERPRETASI DATA (SORTING & FILTERING)
     results.sort((a,b) => b.percent - a.percent);
     const top = results[0];
     const secondary = results[1] && results[1].percent > 20 && (top.percent - results[1].percent) < 35 ? results[1] : null;
     return { top, secondary, totalGejala: selectedIndices.length };
 }
 
+// OUTPUT dan penampilan hasil akhir
 function displayResult(selectedIndices) {
     const resultDiv = document.getElementById('hasil-deteksi');
     if (!resultDiv) return;
@@ -119,6 +124,7 @@ function displayResult(selectedIndices) {
     const topIcon = topDisease.icon ? topDisease.icon : "🐾";
     const secIcon = (detection.secondary && detection.secondary.icon) ? detection.secondary.icon : "🐾";
 
+    //Membuat template HTML untuk menampilkan hasil top dan secondary
     let html = `
         <div style="font-weight:800; font-size:1.4rem; margin-bottom:12px;">📊 Hasil Analisis Gejala</div>
         <div style="background:#f9f6ff; border-radius:28px; padding:1rem;">
