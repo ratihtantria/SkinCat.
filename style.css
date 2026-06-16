@@ -488,3 +488,59 @@ h3 {
     padding: 0.5rem;
     background: #f0eaff;
 }
+/* ==========================================================================
+   TAMBAHAN BARU: LOGIKA CETAK REKAM MEDIS (TARUH DI PALING BAWAH FILE)
+   ========================================================================== */
+.btn-print {
+    background: #059669;
+    color: white;
+    border: none;
+    padding: 12px 24px;
+    border-radius: 8px;
+    cursor: pointer;
+    font-weight: 600;
+    margin-top: 15px;
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 0.95rem;
+    transition: background 0.2s;
+}
+
+.btn-print:hover {
+    background: #047857;
+}
+
+@media print {
+    /* Sembunyikan seluruh elemen di body web seperti navigasi, tombol, dll */
+    body * {
+        visibility: hidden;
+    }
+    
+    /* Paksa hanya kontainer hasil deteksi yang kelihatan */
+    #hasil-deteksi, #hasil-deteksi * {
+        visibility: visible;
+    }
+    
+    /* Posisikan hasil analisis di pojok kiri atas kertas printer */
+    #hasil-deteksi {
+        position: absolute;
+        left: 0;
+        top: 0;
+        width: 100%;
+        padding: 0;
+        box-shadow: none !important;
+        background: transparent !important;
+    }
+
+    /* Sembunyikan tombol "Cetak Hasil" saat kertas diprint */
+    .btn-print {
+        display: none !important;
+    }
+
+    /* Memastikan warna background pastel kotak hasil diagnosis ikut tercetak */
+    div {
+        -webkit-print-color-adjust: exact !important;
+        print-color-adjust: exact !important;
+    }
+}
