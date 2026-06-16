@@ -145,7 +145,7 @@ function displayResult(selectedIndices) {
     }
     
     html += `<div style="margin-top: 16px; font-size:0.85rem; color:#6d28d9; margin-bottom:15px;">✅ Hasil berdasarkan ${detection.totalGejala} gejala yang dipilih. Konsultasikan ke dokter hewan untuk diagnosis lebih lanjut.</div>`;
-    // Untuk Fitur Cetak
+    
     html += `
         <button id="cetak-hasil-btn" class="btn-print">
             🖨️ Cetak Lembar Rekam Medis
